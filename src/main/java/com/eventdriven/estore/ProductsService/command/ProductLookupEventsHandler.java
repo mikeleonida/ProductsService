@@ -8,6 +8,7 @@ import com.eventdriven.estore.ProductsService.core.events.ProductCreatedEvent;
 
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.ResetHandler;
 
 @Component
 @ProcessingGroup("product-group")
@@ -28,4 +29,8 @@ public class ProductLookupEventsHandler {
 		productLookupRepository.save(productLookupEntity);
 	}
 
+	@ResetHandler
+	public void reset() {
+		productLookupRepository.deleteAll();
+	}
 }

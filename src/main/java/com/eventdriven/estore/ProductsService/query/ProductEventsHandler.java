@@ -14,6 +14,8 @@ import com.eventdriven.estore.ProductsService.core.data.ProductEntity;
 import com.eventdriven.estore.ProductsService.core.data.ProductsRepository;
 import com.eventdriven.estore.ProductsService.core.events.ProductCreatedEvent;
 
+import org.axonframework.eventhandling.ResetHandler;
+
 @Component
 @ProcessingGroup("product-group")
 public class ProductEventsHandler {
@@ -82,6 +84,11 @@ public class ProductEventsHandler {
 		
 		LOGGER.debug("ProductReservationCancelledEvent: new product qty: " +
 				p.getQuantity());
+	}
+	
+	@ResetHandler
+	public void reset() {
+		productsRepository.deleteAll();
 	}
 	
 }
