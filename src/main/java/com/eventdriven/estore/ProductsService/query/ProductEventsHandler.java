@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
+import com.appsdeveloperblog.estore.core.events.ProductReservationCancelledEvent;
 import com.appsdeveloperblog.estore.core.events.ProductReservedEvent;
 import com.eventdriven.estore.ProductsService.core.data.ProductEntity;
 import com.eventdriven.estore.ProductsService.core.data.ProductsRepository;
@@ -53,11 +54,34 @@ public class ProductEventsHandler {
 	@EventHandler
 	public void on(ProductReservedEvent productReservedEvent) {
 		ProductEntity productEntity = productsRepository.findByProductId(productReservedEvent.getProductId());
+		
+		LOGGER.debug("ProductReservedEvent: current product qty: " +
+					productEntity.getQuantity());
+		
 		productEntity.setQuantity(productEntity.getQuantity()-productReservedEvent.getQuantity());
 		productsRepository.save(productEntity);
+		
+		LOGGER.debug("ProductReservedEvent: new product qty: " +
+				productEntity.getQuantity());
 		
 		LOGGER.info("ProductReservedEvent is called for productID: "+ productReservedEvent.getProductId()
 				+ " and orderId: " + productReservedEvent.getOrderId());
 	}
 
+	@EventHandler
+	public void on(ProductReservationCancelledEvent productReservationCancelledEvent) {
+		ProductEntity p = productsRepository.findByProductId(productReservationCancelledEvent.getProductId());
+		
+		LOGGER.debug("ProductReservationCancelledEvent: current product qty: " +
+				p.getQuantity());
+		
+		int newQuantity = p.getQuantity() + productReservationCancelledEvent.getQuantity();
+		p.setQuantity(newQuantity);
+		
+		productsRepository.save(p);
+		
+		LOGGER.debug("ProductReservationCancelledEvent: new product qty: " +
+				p.getQuantity());
+	}
+	
 }

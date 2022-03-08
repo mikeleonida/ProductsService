@@ -3,7 +3,9 @@ package com.eventdriven.estore.ProductsService.command;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.beans.BeanUtils;
 
+import com.appsdeveloperblog.estore.core.commands.CancelProductReservationCommand;
 import com.appsdeveloperblog.estore.core.commands.ReserveProductCommand;
+import com.appsdeveloperblog.estore.core.events.ProductReservationCancelledEvent;
 import com.eventdriven.estore.ProductsService.core.events.ProductCreatedEvent;
 
 import java.math.BigDecimal;
@@ -53,6 +55,27 @@ public class ProductAggregate {
 			throw new IllegalArgumentException("Insufficient quantity in stock");
 		}
 		
+	}
+	
+	@CommandHandler
+	public void handle(CancelProductReservationCommand cancelProductReservationCommand) {
+		
+		ProductReservationCancelledEvent productReservationCancelledEvent =
+				ProductReservationCancelledEvent.builder()
+				.orderId(cancelProductReservationCommand.getOrderId())
+				.productId(cancelProductReservationCommand.getProductId())
+				.quantity(cancelProductReservationCommand.getQuantity())
+				.reason(cancelProductReservationCommand.getReason())
+				.userId(cancelProductReservationCommand.getUserId())
+				.build();
+		
+		AggregateLifecycle.apply(productReservationCancelledEvent);
+		
+	}
+	
+	@EventSourcingHandler
+	public void on(ProductReservationCancelledEvent productReservationCancelledEvent) {
+		this.quantity += productReservationCancelledEvent.getQuantity();
 	}
 	
 	@EventSourcingHandler
